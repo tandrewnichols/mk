@@ -2,6 +2,7 @@
 
 var program = require('commander');
 var mk = require('./cli');
+var utils = require('../lib/utils');
 
 program
   .version(require('../package').version)
@@ -17,6 +18,7 @@ program
 
 program
   .command('config')
+  .usage(utils.subUsage('config|c get <key>', 'config|c set <key> <value>'))
   .alias('c')
   .description('Get and set config values')
   .action(mk.config);

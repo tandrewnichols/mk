@@ -1,15 +1,10 @@
+var spawn = require('child_process').spawn;
+var utils = require('../lib/utils');
+
 exports.register = function() {
 
 };
 
 exports.config = function() {
-  //var config = {};
-  //try {
-    //config = require(process.env.HOME + '/.mk/config');
-  //} catch (e) {
-  //}
-
-  //if (method === 'get') {
-    
-  //}
+  utils.spawn('config', arguments).on('close', utils.exit);
 };
