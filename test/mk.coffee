@@ -1,9 +1,9 @@
 _ = require 'lodash'
 
 describe 'mk', ->
-  Given -> @mk = spyObj 'add', 'config'
+  Given -> @mk = spyObj 'register', 'config'
   Given -> @subject = sandbox '../mk',
-    './lib/mk': @mk
+    './cli': @mk
 
   describe 'name', ->
     Then -> expect(@subject.name).to.equal 'mk'
@@ -21,26 +21,19 @@ describe 'mk', ->
         name: 'template'
       ]
     
-    context 'register calls mk.add', ->
+    context 'register calls mk.register', ->
       When -> @subject.parse ['node', 'mk', 'register', 'template']
-      Then -> expect(@mk.add).to.have.been.called
+      Then -> expect(@mk.register).to.have.been.called
 
-    context 'add calls mk.add', ->
+    context 'add calls mk.register', ->
       When -> @subject.parse ['node', 'mk', 'add', 'template']
-      Then -> expect(@mk.add).to.have.been.called
+      Then -> expect(@mk.register).to.have.been.called
 
   describe 'config', ->
     context 'correct settings', ->
       Given -> @cmd = _.findWhere @subject.commands, { _name: 'config' }
       Then -> expect(@cmd._alias).to.equal 'c'
       And -> expect(@cmd._description).to.equal 'Get and set config values'
-      And -> expect(@cmd._args).to.deep.equal [
-        required: true
-        name: 'method'
-      ,
-        required: true
-        name: 'value'
-      ]
 
     context 'config calls mk.config', ->
       When -> @subject.parse ['node', 'mk', 'config', 'get', 'foo']
