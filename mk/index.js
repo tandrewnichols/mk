@@ -18,7 +18,7 @@ program
 
 program
   .command('config')
-  .usage(utils.subUsage('config|c get <key>', 'config|c set <key> <value>'))
+  .usage(utils.subUsage('config|c', ['get <key>', 'set <key> <value>']))
   .alias('c')
   .description('Get and set config values')
   .action(mk.config);

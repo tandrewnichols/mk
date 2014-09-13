@@ -9,7 +9,7 @@ describe 'mk', ->
     Then -> expect(@subject.name).to.equal 'mk'
 
   describe 'version', ->
-    Then -> expect(@subject.version()).to.equal require('../package').version
+    Then -> expect(@subject.version()).to.equal require('../../package').version
 
   describe 'register', ->
     context 'correct settings', ->

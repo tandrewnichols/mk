@@ -2,12 +2,6 @@ global.sinon = require 'sinon'
 global.expect = require('indeed').expect
 indeed = require('indeed').indeed
 _ = require 'lodash'
-indeed.mixin
-  functions: (conditions) ->
-    (val) ->
-      _.every conditions, (condition) ->
-        typeof val[condition] == 'function'
-
 global.sandbox = require 'proxyquire'
 
 global.spyObj = (fns...) ->
