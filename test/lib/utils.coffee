@@ -51,24 +51,24 @@ describe 'utils', ->
       Then -> expect(@emitter).to.equal 'blah'
 
   describe 'exit', ->
-    afterEach -> console.log.restore()
+    afterEach -> @subject.writeBlock.restore()
     afterEach -> process.exit.restore()
-    Given -> sinon.stub console, 'log'
+    Given -> sinon.stub @subject, 'writeBlock'
     Given -> sinon.stub process, 'exit'
 
     context 'code is string', ->
       When -> @subject.exit 'error'
-      Then -> expect(console.log).to.have.been.calledWith '   ', chalk.red('error')
+      Then -> expect(@subject.writeBlock).to.have.been.calledWith chalk.red('error')
       And -> expect(process.exit).to.have.been.calledWith 1
 
     context 'code is numder', ->
       When -> @subject.exit 1
-      Then -> expect(console.log).to.have.been.calledWith '   ', chalk.red('Something went wrong. The command returned code 1.')
+      Then -> expect(@subject.writeBlock).to.have.been.calledWith chalk.red('Something went wrong. The command returned code 1.')
       And -> expect(process.exit).to.have.been.calledWith 1
 
     context 'code is error', ->
       When -> @subject.exit(new Error('foo'))
-      Then -> expect(console.log).to.have.been.calledWith '   ', chalk.red('foo')
+      Then -> expect(@subject.writeBlock).to.have.been.calledWith chalk.red('foo')
       And -> expect(process.exit).to.have.been.calledWith 1
 
     context 'no code', ->
@@ -78,3 +78,21 @@ describe 'utils', ->
   describe 'subUsage', ->
     When -> @usage = @subject.subUsage 'foo', [ 'bar', 'baz' ]
     Then -> expect(@usage).to.equal '\n     or: foo bar\n     or: foo baz'
+
+  describe 'writeBlock', ->
+    afterEach -> console.log.restore()
+    Given -> sinon.stub console, 'log'
+
+    context 'with strings', ->
+      When -> @subject.writeBlock 'foo', 'bar'
+      Then -> expect(console.log.getCall(0).args).to.deep.equal []
+      And -> expect(console.log.getCall(1).args).to.deep.equal ['   ', 'foo']
+      And -> expect(console.log.getCall(2).args).to.deep.equal ['   ', 'bar']
+      And -> expect(console.log.getCall(3).args).to.deep.equal []
+
+    context 'with an array', ->
+      When -> @subject.writeBlock 'foo', ['bar', 'baz']
+      Then -> expect(console.log.getCall(0).args).to.deep.equal []
+      And -> expect(console.log.getCall(1).args).to.deep.equal ['   ', 'foo']
+      And -> expect(console.log.getCall(2).args).to.deep.equal ['   ', 'bar', 'baz']
+      And -> expect(console.log.getCall(3).args).to.deep.equal []

@@ -25,7 +25,7 @@ describe 'mk-config', ->
       When -> @subject.parse ['node', 'mk-config', 'set', 'foo', 'bar']
       Then -> expect(@config.set).to.have.been.called
 
-  describe 'config', ->
+  describe 'get', ->
     context 'correct settings', ->
       Given -> @cmd = _.findWhere @subject.commands, { _name: 'get' }
       And -> expect(@cmd._description).to.equal 'Get a config value'
