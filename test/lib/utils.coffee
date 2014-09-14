@@ -2,14 +2,17 @@ chalk = require 'chalk'
 
 describe 'utils', ->
   Given -> @cp = spyObj 'spawn'
+  Given -> @fs = spyObj 'existsSync', 'mkdirSync'
   Given -> @stubs =
     child_process: @cp
+    fs: @fs
   Given -> @stubs[process.env.HOME + '/.mk/config'] =
     foo: 'bar'
     '@noCallThru': true
   Given -> @subject = sandbox '../lib/utils', @stubs
 
   describe 'getConfig', ->
+    Given -> @fs.existsSync.withArgs(process.env.HOME + '/.mk').returns true
     context 'with config', ->
       When -> @config = @subject.getConfig()
       Then -> expect(@config).to.deep.equal
@@ -22,6 +25,15 @@ describe 'utils', ->
       Given -> process.env.HOME = '/Users/Blah'
       When -> @config = @subject.getConfig()
       Then -> expect(@config).to.deep.equal {}
+
+    context '.mk does not exist', ->
+      Given -> @home = process.env.HOME
+      afterEach -> process.env.HOME = @home
+      Given -> process.env.HOME = '/Users/Blah'
+      Given -> @fs.existsSync.withArgs(process.env.HOME + '/.mk').returns false
+      When -> @config = @subject.getConfig()
+      Then -> expect(@config).to.deep.equal {}
+      And -> expect(@fs.mkdirSync).to.have.been.calledWith process.env.HOME + '/.mk'
 
   describe 'spawn', ->
     Given -> @opts =
@@ -58,6 +70,10 @@ describe 'utils', ->
       When -> @subject.exit(new Error('foo'))
       Then -> expect(console.log).to.have.been.calledWith '   ', chalk.red('foo')
       And -> expect(process.exit).to.have.been.calledWith 1
+
+    context 'no code', ->
+      When -> @subject.exit null
+      Then -> expect(process.exit).to.have.been.called
 
   describe 'subUsage', ->
     When -> @usage = @subject.subUsage 'foo', [ 'bar', 'baz' ]
