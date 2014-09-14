@@ -3,12 +3,20 @@ chalk = require 'chalk'
 describe 'utils', ->
   Given -> @cp = spyObj 'spawn'
   Given -> @fs = spyObj 'existsSync', 'mkdirSync'
+  Given -> @grunt = spyObj 'tasks', 'initConfig'
+  Given -> @foo = sinon.stub()
+  Given -> @bar = sinon.stub()
   Given -> @stubs =
     child_process: @cp
     fs: @fs
+    grunt: @grunt
+    foo: @foo
+    bar: @bar
   Given -> @stubs[process.env.HOME + '/.mk/config'] =
     foo: 'bar'
     '@noCallThru': true
+  Given -> @foo['@noCallThru'] = true
+  Given -> @bar['@noCallThru'] = true
   Given -> @subject = sandbox '../lib/utils', @stubs
 
   describe 'getConfig', ->
@@ -96,3 +104,8 @@ describe 'utils', ->
       And -> expect(console.log.getCall(1).args).to.deep.equal ['   ', 'foo']
       And -> expect(console.log.getCall(2).args).to.deep.equal ['   ', 'bar', 'baz']
       And -> expect(console.log.getCall(3).args).to.deep.equal []
+
+  describe 'registerTasks', ->
+    When -> @subject.registerTasks 'foo', 'bar'
+    Then -> expect(@foo).to.have.been.calledWith @grunt
+    Then -> expect(@bar).to.have.been.calledWith @grunt

@@ -19,6 +19,9 @@ describe 'mk', ->
       And -> expect(@cmd._args).to.deep.equal [
         required: true
         name: 'template'
+      ,
+        required: false
+        name: 'name'
       ]
     
     context 'register calls mk.register', ->

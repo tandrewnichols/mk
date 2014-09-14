@@ -2,9 +2,47 @@ EventEmitter = require('events').EventEmitter
 chalk = require 'chalk'
 
 describe 'mk cli', ->
-  Given -> @utils = spyObj 'spawn', 'exit', 'writeBlock'
+  Given -> @utils = spyObj 'spawn', 'exit', 'writeBlock', 'registerTasks', 'resolveTemplate', 'runTasks'
+  Given -> @path = {}
   Given -> @subject = sandbox '../lib/mk/cli',
     '../utils': @utils
+    path: @path
+
+  describe 'register', ->
+    Given -> @opts = {}
+    Given -> @utils.resolveTemplate.withArgs('template').returns 'git@github.com:some/template.git'
+    Given -> @path.resolve = sinon.stub()
+    Given -> @path.resolve.returns 'foo/bar'
+
+    context 'with no name', ->
+      When -> @subject.register 'template', undefined, @opts
+      Then -> expect(@utils.registerTasks).to.have.been.calledWith 'grunt-simple-git', 'foo/bar'
+      And -> expect(@utils.runTasks).to.have.been.calledWith
+        git:
+          options:
+            cwd: process.env.HOME + '/.mk'
+          clone:
+            cmd: 'clone git@github.com:some/template.git'
+        config:
+          key: 'template'
+          value:
+            path: process.env.HOME + '/.mk/template'
+      , ['git:clone', 'config'], 'Register template'
+
+    context 'with a name', ->
+      When -> @subject.register 'template', 'name', @opts
+      Then -> expect(@utils.registerTasks).to.have.been.calledWith 'grunt-simple-git', 'foo/bar'
+      And -> expect(@utils.runTasks).to.have.been.calledWith
+        git:
+          options:
+            cwd: process.env.HOME + '/.mk'
+          clone:
+            cmd: 'clone git@github.com:some/template.git name'
+        config:
+          key: 'name'
+          value:
+            path: process.env.HOME + '/.mk/name'
+      , ['git:clone', 'config'], 'Register template as name'
 
   describe 'config', ->
     context 'with set or get', ->
