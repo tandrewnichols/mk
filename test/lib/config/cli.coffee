@@ -12,7 +12,7 @@ describe 'mk-config cli', ->
     Given -> sinon.stub console, 'log'
     Given -> @opts = {}
     When -> @subject.get 'foo', @opts
-    Then -> expect(console.log).to.have.been.calledWith 'bar'
+    Then -> expect(console.log).to.have.been.called
 
   describe 'set', ->
     Given -> @opts = {}

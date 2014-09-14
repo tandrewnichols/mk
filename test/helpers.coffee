@@ -1,6 +1,5 @@
 global.sinon = require 'sinon'
 global.expect = require('indeed').expect
-indeed = require('indeed').indeed
 _ = require 'lodash'
 global.sandbox = require 'proxyquire'
 
