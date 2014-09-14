@@ -2,8 +2,26 @@ chalk = require 'chalk'
 
 describe 'utils', ->
   Given -> @cp = spyObj 'spawn'
-  Given -> @subject = sandbox '../lib/utils',
+  Given -> @stubs =
     child_process: @cp
+  Given -> @stubs[process.env.HOME + '/.mk/config'] =
+    foo: 'bar'
+    '@noCallThru': true
+  Given -> @subject = sandbox '../lib/utils', @stubs
+
+  describe 'getConfig', ->
+    context 'with config', ->
+      When -> @config = @subject.getConfig()
+      Then -> expect(@config).to.deep.equal
+        foo: 'bar'
+        '@noCallThru': true
+
+    context 'with no config', ->
+      Given -> @home = process.env.HOME
+      afterEach -> process.env.HOME = @home
+      Given -> process.env.HOME = '/Users/Blah'
+      When -> @config = @subject.getConfig()
+      Then -> expect(@config).to.deep.equal {}
 
   describe 'spawn', ->
     Given -> @opts =

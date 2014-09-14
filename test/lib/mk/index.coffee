@@ -2,14 +2,14 @@ _ = require 'lodash'
 
 describe 'mk', ->
   Given -> @mk = spyObj 'register', 'config'
-  Given -> @subject = sandbox '../mk',
+  Given -> @subject = sandbox '../lib/mk',
     './cli': @mk
 
   describe 'name', ->
     Then -> expect(@subject.name).to.equal 'mk'
 
   describe 'version', ->
-    Then -> expect(@subject.version()).to.equal require('../../package').version
+    Then -> expect(@subject.version()).to.equal require('../../../package').version
 
   describe 'register', ->
     context 'correct settings', ->

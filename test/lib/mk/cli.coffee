@@ -2,8 +2,8 @@ EventEmitter = require('events').EventEmitter
 
 describe 'mk cli', ->
   Given -> @utils = spyObj 'spawn', 'exit'
-  Given -> @subject = sandbox '../mk/cli',
-    '../lib/utils': @utils
+  Given -> @subject = sandbox '../lib/mk/cli',
+    '../utils': @utils
 
   describe 'config', ->
     Given -> @spawn = new EventEmitter

@@ -42,10 +42,11 @@
     "chalk": "^0.5.1",
     "commander": "^2.3.0",
     "config-extend": "0.0.7",
+    "grunt": "^0.4.5",
     "key-list": "^0.1.1",
     "lodash": "^2.4.1",
-    "grunt": "^0.4.5",
-    "request": "^2.42.0"
+    "request": "^2.42.0",
+    "task-master": "^2.0.2"
   },
   "devDependencies": {
     "coffee-script": "^1.8.0",
@@ -59,7 +60,6 @@
     "mocha-given": "git://github.com/tandrewnichols/mocha-given.git",
     "mocha-lcov-reporter": "^0.0.1",
     "proxyquire": "^1.0.1",
-    "sinon": "^1.10.3",
-    "task-master": "^2.0.1"
+    "sinon": "^1.10.3"
   }
 }
