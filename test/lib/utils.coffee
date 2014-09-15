@@ -2,7 +2,7 @@ chalk = require 'chalk'
 
 describe 'utils', ->
   Given -> @cp = spyObj 'spawn'
-  Given -> @fs = spyObj 'existsSync', 'mkdirSync'
+  Given -> @fs = spyObj 'existsSync', 'mkdirSync', 'writeFile'
   Given -> @grunt = spyObj 'tasks', 'initConfig'
   Given -> @foo = sinon.stub()
   Given -> @bar = sinon.stub()
@@ -105,7 +105,11 @@ describe 'utils', ->
       And -> expect(console.log.getCall(2).args).to.deep.equal ['   ', 'bar', 'baz']
       And -> expect(console.log.getCall(3).args).to.deep.equal []
 
-  describe 'registerTasks', ->
-    When -> @subject.registerTasks 'foo', 'bar'
-    Then -> expect(@foo).to.have.been.calledWith @grunt
-    Then -> expect(@bar).to.have.been.calledWith @grunt
+  describe 'writeConfig', ->
+    Given -> @options =
+      root: '/foo/bar'
+    Given -> @config =
+      foo: 'bar'
+    Given -> @cb = sinon.stub()
+    When -> @subject.writeConfig @options, @config, @cb
+    Then -> expect(@fs.writeFile).to.have.been.calledWith '/foo/bar/config.json', JSON.stringify(@config, null, 2), @cb

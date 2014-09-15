@@ -2,47 +2,55 @@ EventEmitter = require('events').EventEmitter
 chalk = require 'chalk'
 
 describe 'mk cli', ->
-  Given -> @utils = spyObj 'spawn', 'exit', 'writeBlock', 'registerTasks', 'resolveTemplate', 'runTasks'
-  Given -> @path = {}
+  Given -> @utils = spyObj 'spawn', 'exit', 'writeBlock', 'resolveTemplate', 'writeConfig'
+  Given -> @cp = spyObj 'spawn'
   Given -> @subject = sandbox '../lib/mk/cli',
     '../utils': @utils
-    path: @path
+    child_process: @cp
 
   describe 'register', ->
-    Given -> @opts = {}
+    Given -> @opts =
+      root: '/foo/bar'
+      config: {}
     Given -> @utils.resolveTemplate.withArgs('template').returns 'git@github.com:some/template.git'
-    Given -> @path.resolve = sinon.stub()
-    Given -> @path.resolve.returns 'foo/bar'
 
     context 'with no name', ->
+      Given -> @spawn = new EventEmitter()
+      Given -> @cp.spawn.withArgs('git', ['clone', 'git@github.com:some/template.git'],
+        stdio: 'inherit'
+        cwd: '/foo/bar'
+      ).returns @spawn
       When -> @subject.register 'template', undefined, @opts
-      Then -> expect(@utils.registerTasks).to.have.been.calledWith 'grunt-simple-git', 'foo/bar'
-      And -> expect(@utils.runTasks).to.have.been.calledWith
-        git:
-          options:
-            cwd: process.env.HOME + '/.mk'
-          clone:
-            cmd: 'clone git@github.com:some/template.git'
+      And -> @spawn.emit 'close', 0
+      Then -> expect(@utils.writeBlock).to.have.been.calledWith chalk.green('Registered template.')
+      And -> expect(@utils.writeConfig).to.have.been.calledWith
+        root: '/foo/bar'
         config:
-          key: 'template'
-          value:
-            path: process.env.HOME + '/.mk/template'
-      , ['git:clone', 'config'], 'Register template'
+          templates: [
+            key: 'template'
+            value:
+              path: '/foo/bar/template'
+          ]
+      , @utils.exit
 
     context 'with a name', ->
+      Given -> @spawn = new EventEmitter()
+      Given -> @cp.spawn.withArgs('git', ['clone', 'git@github.com:some/template.git', 'name'],
+        stdio: 'inherit'
+        cwd: '/foo/bar'
+      ).returns @spawn
       When -> @subject.register 'template', 'name', @opts
-      Then -> expect(@utils.registerTasks).to.have.been.calledWith 'grunt-simple-git', 'foo/bar'
-      And -> expect(@utils.runTasks).to.have.been.calledWith
-        git:
-          options:
-            cwd: process.env.HOME + '/.mk'
-          clone:
-            cmd: 'clone git@github.com:some/template.git name'
+      And -> @spawn.emit 'close', 0
+      Then -> expect(@utils.writeBlock).to.have.been.calledWith chalk.green('Registered template as name.')
+      And -> expect(@utils.writeConfig).to.have.been.calledWith
+        root: '/foo/bar'
         config:
-          key: 'name'
-          value:
-            path: process.env.HOME + '/.mk/name'
-      , ['git:clone', 'config'], 'Register template as name'
+          templates: [
+            key: 'name'
+            value:
+              path: '/foo/bar/name'
+          ]
+      , @utils.exit
 
   describe 'config', ->
     context 'with set or get', ->
@@ -55,11 +63,14 @@ describe 'mk cli', ->
     context 'with no parameters', ->
       Given -> @opts = {}
       When -> @subject.config @opts
-      Then -> expect(@utils.writeBlock).to.have.been.calledWith(
+      Then -> expect(@utils.writeBlock.getCall(0).args).to.deep.equal [
         'The following config values can be set:',
         ['   ', chalk.magenta('username') + ': ', 'Your github username.', chalk.cyan('<String>')],
         ['   ', chalk.magenta('pattern') + ':  ', 'Interpolation style or regex pattern.', chalk.cyan('<String|RegExp>')],
         ['   ', chalk.magenta('private') + ':  ', 'New repos should marked private.', chalk.cyan('<Boolean>')],
         ['   ', chalk.magenta('wiki') + ':     ', 'New repos should include a wiki.', chalk.cyan('<Boolean>')],
         ['   ', chalk.magenta('issues') + ':   ', 'New repos should include an issues page.', chalk.cyan('<Boolean>')]
-      )
+      ]
+      And -> expect(@utils.writeBlock.getCall(1).args).to.deep.equal [
+        'Additionally, any option besides username can be specified on a registered template with dot notation (e.g. "templateName.wiki")'
+      ]
