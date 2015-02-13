@@ -31,7 +31,6 @@
   "bugs": {
     "url": "https://github.com/tandrewnicholds/mk/issues"
   },
-  "homepage": "http://www.tandrewnichols.me/modules/mk",
   "preferGlobal": true,
   "bin": {
     "mk": "./lib/mk/index.js",
@@ -45,6 +44,7 @@
     "key-list": "^0.1.1",
     "lodash": "^2.4.1",
     "request": "^2.42.0",
+    "safe-obj": "^0.1.4",
     "underscore.string": "^2.3.3"
   },
   "devDependencies": {
